@@ -37,33 +37,41 @@ def process():
 
 # Extract image samples and save to output dir
 def extractDataset(dataset):
+    objects = dataset['object']
+    if not isinstance(objects, list):
+        objects = [objects]
+
     print("Found {} objects on image '{}'...".format(
-        len(dataset['object']), dataset['filename']))
+        len(objects), dataset['filename']))
 
     # Open image and get ready to process
     img = Image.open(dataset['filename'])
 
-    # Create output directory
     save_dir = dataset['filename'].split('.')[0]
-    try:
-        os.mkdir(save_dir)
-    except:
-        pass
+   # Create output directory
+
     # Image name preamble
-    sample_preamble = save_dir + "/" + dataset['filename'].split('.')[0] + "_"
+    sample_preamble = dataset['filename'].split('.')[0] + "_"
     # Image counter
     i = 0
 
     # Run through each item and save cut image to output folder
-    for item in dataset['object']:
+    for item in objects:
         # Convert str to integers
+        save_dir = item['name']
+        try:
+            os.mkdir(save_dir)
+        except:
+            pass
+
         bndbox = dict([(a, int(b)) for (a, b) in item['bndbox'].items()])
         # Crop image
         im = img.crop((bndbox['xmin'], bndbox['ymin'],
                        bndbox['xmax'], bndbox['ymax']))
         # Save
-        im.save(sample_preamble + str(i) + '.jpg')
+        im.save(save_dir + "/" + sample_preamble + str(i) + '.png')
         i = i + 1
+
 
 if __name__ == '__main__':
     print("\n------------------------------------")
